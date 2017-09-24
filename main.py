@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import socket
 import sys
+
+from urllib.request import urlopen
 
 
 def close_connection(*args):
@@ -42,8 +45,18 @@ def get_help():
 
 
 def get_ip_address():
-    print('Local IPv6 Address: 0.0.0.0')
-    print('External IPv6 Address: 0.0.0.0')
+    external_address = '0.0.0.0'
+    local_address = socket.gethostbyname(socket.gethostname())
+
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as client:
+        client.connect(('8.8.8.8', 80))
+        local_address = client.getsockname()[0]
+
+    with urlopen('http://bot.whatismyipaddress.com/') as request:
+        external_address = request.read().decode('utf-8')
+
+    print('Local IPv6 Address: {}'.format(local_address))
+    print('External IPv6 Address: {}'.format(external_address))
 
 
 def list_connected_machines():
