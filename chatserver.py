@@ -13,7 +13,7 @@ def broadcast(server, omitted_client, message):
         if client != server and client != omitted_client:
             try:
                 client.send(message)
-            except:
+            except socket.error:
                 client.close()
                 if client in CLIENTS:
                     CLIENTS.remove(client)
@@ -45,13 +45,13 @@ def chat_server():
 
                     if data:
                         broadcast(server, client,
-                                  '\r[%s] %s' % (client.getpeername(), data))
+                                  '\r[%s] %s' % (str(client.getpeername()), data))
                     else:
                         if client in CLIENTS:
                             CLIENTS.remove(client)
                         broadcast(server, client,
                                   'Client (%s, %s) is offline\n' % address)
-                except:
+                except socket.error:
                     broadcast(server, client,
                               'Client (%s, %s) is offline\n' % address)
                     continue
