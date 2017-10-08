@@ -13,16 +13,15 @@ def broadcast(server, omitted_client, message):
         if client != server and client != omitted_client:
             try:
                 client.send(message)
-            except socket.error:
+            except:
+                client.close()
                 if client in CLIENTS:
                     CLIENTS.remove(client)
-            finally:
-                client.close()
 
 
 def chat_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
     server.listen(10)
 
@@ -52,7 +51,7 @@ def chat_server():
                             CLIENTS.remove(client)
                         broadcast(server, client,
                                   'Client (%s, %s) is offline\n' % address)
-                except socket.error:
+                except:
                     broadcast(server, client,
                               'Client (%s, %s) is offline\n' % address)
                     continue
