@@ -3,12 +3,12 @@ import socket
 import sys
 
 
-def chat_client():
+def chat_client(port):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.settimeout(2)
 
     try:
-        client.connect(('', 2048))
+        client.connect(('', port))
     except socket.error:
         print 'Unable to connect'
         sys.exit()
@@ -20,9 +20,9 @@ def chat_client():
     while True:
         read_connections, _, _ = select.select([sys.stdin, client], [], [])
 
-        for plug in read_connections:
-            if plug == client:
-                data = plug.recv(4096)
+        for connection in read_connections:
+            if connection == client:
+                data = connection.recv(4096)
 
                 if data:
                     sys.stdout.write(data)
@@ -36,7 +36,3 @@ def chat_client():
                 client.send(message)
                 sys.stdout.write('[Me] ')
                 sys.stdout.flush()
-
-
-if __name__ == "__main__":
-    sys.exit(chat_client())
