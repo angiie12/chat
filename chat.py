@@ -4,7 +4,7 @@ import threading
 import time
 
 
-CLIENTS = []
+CLIENTS = {}
 
 
 def add_client(host, address):
@@ -14,7 +14,7 @@ def add_client(host, address):
         client = socket.socket()
         client.connect(client_address)
 
-        CLIENTS.append(client)
+        CLIENTS[client_address] = client
 
         print 'Connected with %s:%d.' % client_address
 
@@ -35,7 +35,7 @@ def chat_server(port):
 
     while True:
         client, address = server.accept()
-        CLIENTS.append(client)
+        CLIENTS[address] = client 
 
         sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
         sys.stdout.flush()
@@ -68,6 +68,13 @@ def handle_conversation(client, address):
     sys.stdout.flush()
 
 
+def list_connected_clients():
+    print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
+
+    for count, address in enumerate(CLIENTS):
+        print '%4d\t%11s\t%d' % (count, address[0], address[1])
+
+
 # def remove_client(client, address):
 #     pass
 
@@ -85,9 +92,11 @@ def main():
             add_client(response[1], int(response[2]))
         elif ':quit' in response:
             pass
+        elif response.lower().startswith('list'):
+            list_connected_clients()
         else:
-            for client in CLIENTS:
-                client.send(response)
+            for address in CLIENTS:
+                CLIENTS[address].send(response)
 
 
 if __name__ == '__main__':
