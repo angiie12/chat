@@ -51,6 +51,20 @@ def display_help_menu():
         print help_menu.read()
 
 
+def get_ip_address():
+    connection = None
+
+    try:
+        connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        connection.connect(('8.8.8.8', 80))
+        print connection.getsockname()[0]
+    except socket.error:
+        print '127.0.0.1'
+    finally:
+        if connection:
+            connection.close()
+
+
 def handle_conversation(client, address):
     while True:
         try:
@@ -99,6 +113,8 @@ def main():
             display_help_menu()
         elif response.lower().startswith('list'):
             list_connected_clients()
+        elif response.lower().startswith('myip'):
+            get_ip_address()
         elif ':quit' in response:
             pass
         else:
