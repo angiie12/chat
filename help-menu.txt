@@ -1,0 +1,8 @@
+connect <destination> <port no> - Establishes a new TCP connection with the specified host address and port number.
+exit - Closes all connections and terminates the processes.
+help - Lists all the available commands.
+list - Displays an enumerated list of all the connected clients.
+myip - Displays the host’s IP address.
+myport - Displays the host’s port number.
+send <connection id> <message> - Sends a message to the host with the specified ID.
+terminate <connection id> - Terminates the connection of the specified client ID.

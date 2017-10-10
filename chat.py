@@ -46,6 +46,11 @@ def chat_server(port):
     server.close()
 
 
+def display_help_menu():
+    with open('help-menu.txt', 'r') as help_menu:
+        print help_menu.read()
+
+
 def handle_conversation(client, address):
     while True:
         try:
@@ -90,10 +95,12 @@ def main():
         if response.lower().startswith('connect'):
             response = response.split(' ')
             add_client(response[1], int(response[2]))
-        elif ':quit' in response:
-            pass
+        elif response.lower().startswith('help'):
+            display_help_menu()
         elif response.lower().startswith('list'):
             list_connected_clients()
+        elif ':quit' in response:
+            pass
         else:
             for address in CLIENTS:
                 CLIENTS[address].send(response)
