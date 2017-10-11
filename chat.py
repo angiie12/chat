@@ -4,46 +4,55 @@ import threading
 import time
 
 
-CLIENTS = {}
+class ChatServer(threading.Thread):
 
+    def __init__(self, port):
+        threading.Thread.__init__(self)
 
-def add_client(host, address):
-    try:
-        client_address = (host, address)
+        self.clients = {}
+        self.port = port
+        self.server = None
 
-        client = socket.socket()
-        client.connect(client_address)
+    def add_client(self, host, address):
+        try:
+            client_address = (host, address)
 
-        CLIENTS[client_address] = client
+            client = socket.socket()
+            client.connect(client_address)
 
-        print 'Connected with %s:%d.' % client_address
+            self.clients[client_address] = client
 
-        threading.Thread(target=handle_conversation,
-                         args=(client, client_address,)).start()
-    except socket.error:
-        print 'Could not connect with %s:%d.' % client_address
+            print 'Connected with %s:%d.' % client_address
 
+            threading.Thread(target=handle_conversation,
+                             args=(client, client_address,)).start()
+        except socket.error:
+            print 'Could not connect with %s:%d.' % client_address
 
-def chat_server(port):
-    server_address = ('', port)
+    def list_connected_clients(self):
+        print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
 
-    server = socket.socket()
-    server.bind(server_address)
-    server.listen(10)
+        for count, address in enumerate(self.clients):
+            print '%4d\t%11s\t%d' % (count, address[0], address[1])
 
-    print 'Chat server is listening on localhost, port %d.' % port
+    def run(self):
+        self.server = socket.socket()
+        self.server.bind(('', self.port))
+        self.server.listen(10)
 
-    while True:
-        client, address = server.accept()
-        CLIENTS[address] = client 
+        print 'Chat server is listening on localhost, port %d.' % self.port
 
-        sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
-        sys.stdout.flush()
+        while True:
+            client, address = self.server.accept()
+            self.clients[address] = client
 
-        threading.Thread(target=handle_conversation,
-                         args=(client, address,)).start()
+            sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
+            sys.stdout.flush()
 
-    server.close()
+            threading.Thread(target=handle_conversation,
+                             args=(client, address,)).start()
+
+        self.server.close()
 
 
 def display_help_menu():
@@ -87,20 +96,14 @@ def handle_conversation(client, address):
     sys.stdout.flush()
 
 
-def list_connected_clients():
-    print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
-
-    for count, address in enumerate(CLIENTS):
-        print '%4d\t%11s\t%d' % (count, address[0], address[1])
-
-
 # def remove_client(client, address):
 #     pass
 
 
 def main():
-    # TODO To terminate the chat_server, it would be better to make it a class.
-    threading.Thread(target=chat_server, args=(2048,)).start()
+    server = ChatServer(2048)
+    server.start()
+
     time.sleep(0.1)
 
     while True:
@@ -108,18 +111,18 @@ def main():
 
         if response.lower().startswith('connect'):
             response = response.split(' ')
-            add_client(response[1], int(response[2]))
+            server.add_client(response[1], int(response[2]))
         elif response.lower() == 'exit':
             pass
         elif response.lower() == 'help':
             display_help_menu()
         elif response.lower() == 'list':
-            list_connected_clients()
+            server.list_connected_clients()
         elif response.lower() == 'myip':
             get_ip_address()
         else:
-            for address in CLIENTS:
-                CLIENTS[address].send(response)
+            for address in server.clients:
+                server.clients[address].send(response)
 
 
 if __name__ == '__main__':
