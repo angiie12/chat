@@ -109,14 +109,14 @@ def main():
         if response.lower().startswith('connect'):
             response = response.split(' ')
             add_client(response[1], int(response[2]))
-        elif response.lower().startswith('help'):
-            display_help_menu()
-        elif response.lower().startswith('list'):
-            list_connected_clients()
-        elif response.lower().startswith('myip'):
-            get_ip_address()
-        elif ':quit' in response:
+        elif response.lower() == 'exit':
             pass
+        elif response.lower() == 'help':
+            display_help_menu()
+        elif response.lower() == 'list':
+            list_connected_clients()
+        elif response.lower() == 'myip':
+            get_ip_address()
         else:
             for address in CLIENTS:
                 CLIENTS[address].send(response)
