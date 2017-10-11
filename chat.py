@@ -11,6 +11,7 @@ class ChatServer(threading.Thread):
 
         self.clients = {}
         self.port = port
+        self.running = True
         self.server = None
 
     def add_client(self, host, address):
@@ -24,16 +25,52 @@ class ChatServer(threading.Thread):
 
             print 'Connected with %s:%d.' % client_address
 
-            threading.Thread(target=handle_conversation,
+            threading.Thread(target=self.handle_conversation,
                              args=(client, client_address,)).start()
         except socket.error:
             print 'Could not connect with %s:%d.' % client_address
+
+    def handle_conversation(self, client, address):
+        while self.running:
+            try:
+                data = client.recv(1024)
+
+                if not data:
+                    break
+
+                sys.stdout.write('\n[%s:%s] %s\n>>> ' %
+                                 (address[0], address[1], data))
+                sys.stdout.flush()
+
+            except socket.error:
+                break
+
+        # self.remove_client(client, address)
+
+        client.close()
+
+        sys.stdout.write('\nClient %s:%s disconnected.\n>>> ' % address)
+        sys.stdout.flush()
+
+    def join(self, timeout=None):
+        self.running = False
+
+        # Since the server is still listening to accept a new connection, the
+        # while-loop will not break when the running condition becomes False.
+        # Therefore, by creating a new connection, the server can accept the
+        # connection and eventually close down.
+        socket.socket().connect(('', self.port))
+
+        threading.Thread.join(self)
 
     def list_connected_clients(self):
         print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
 
         for count, address in enumerate(self.clients):
             print '%4d\t%11s\t%d' % (count, address[0], address[1])
+
+    # def remove_client(self, client, address):
+    #     pass
 
     def run(self):
         self.server = socket.socket()
@@ -42,14 +79,14 @@ class ChatServer(threading.Thread):
 
         print 'Chat server is listening on localhost, port %d.' % self.port
 
-        while True:
+        while self.running:
             client, address = self.server.accept()
             self.clients[address] = client
 
             sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
             sys.stdout.flush()
 
-            threading.Thread(target=handle_conversation,
+            threading.Thread(target=self.handle_conversation,
                              args=(client, address,)).start()
 
         self.server.close()
@@ -74,46 +111,20 @@ def get_ip_address():
             connection.close()
 
 
-def handle_conversation(client, address):
-    while True:
-        try:
-            data = client.recv(1024)
-
-            if not data:
-                break
-
-            sys.stdout.write('\n[%s:%s] %s\n>>> ' % (address[0], address[1], data))
-            sys.stdout.flush()
-
-        except socket.error:
-            break
-
-    # remove_client(client, address)
-
-    client.close()
-
-    sys.stdout.write('\nClient %s:%s disconnected.\n>>> ' % address)
-    sys.stdout.flush()
-
-
-# def remove_client(client, address):
-#     pass
-
-
 def main():
     server = ChatServer(2048)
     server.start()
 
     time.sleep(0.1)
 
-    while True:
+    while server.running:
         response = raw_input('>>> ')
 
         if response.lower().startswith('connect'):
             response = response.split(' ')
             server.add_client(response[1], int(response[2]))
         elif response.lower() == 'exit':
-            pass
+            server.join()
         elif response.lower() == 'help':
             display_help_menu()
         elif response.lower() == 'list':
