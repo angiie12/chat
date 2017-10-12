@@ -25,8 +25,11 @@ class ChatServer(threading.Thread):
 
             print 'Connected with %s:%d.' % client_address
 
-            threading.Thread(target=self.handle_conversation,
-                             args=(client, client_address,)).start()
+            thread = threading.Thread(target=self.handle_conversation,
+                                      args=(client, client_address,))
+            thread.daemon = True
+            thread.start()
+
         except socket.error:
             print 'Could not connect with %s:%d.' % client_address
 
@@ -86,8 +89,10 @@ class ChatServer(threading.Thread):
             sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
             sys.stdout.flush()
 
-            threading.Thread(target=self.handle_conversation,
-                             args=(client, address,)).start()
+            thread = threading.Thread(target=self.handle_conversation,
+                                      args=(client, address,))
+            thread.daemon = True
+            thread.start()
 
         self.server.close()
 
