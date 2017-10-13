@@ -66,20 +66,17 @@ class ChatServer(threading.Thread):
     def list_connected_clients(self):
         closed_clients = []
 
-        for client in self.clients:
+        print '%-4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
+
+        for count, client in enumerate(self.clients):
             try:
-                client.getsockname()
+                address = client.getpeername()
+                print '%-4d\t%11s\t%d' % (count, address[0], address[1])
             except socket.error:
                 closed_clients.append(client)
 
         for client in closed_clients:
             self.clients.remove(client)
-
-        print '%-4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
-
-        for count, client in enumerate(self.clients):
-            address = client.getpeername()
-            print '%-4d\t%11s\t%d' % (count, address[0], address[1])
 
     def run(self):
         self.server = socket.socket()
