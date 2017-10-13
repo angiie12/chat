@@ -9,7 +9,7 @@ class ChatServer(threading.Thread):
     def __init__(self, port):
         threading.Thread.__init__(self)
 
-        self.clients = {}
+        self.clients = []
         self.port = port
         self.running = True
         self.server = None
@@ -20,8 +20,7 @@ class ChatServer(threading.Thread):
 
             client = socket.socket()
             client.connect(client_address)
-
-            self.clients[client_address] = client
+            self.clients.append(client)
 
             print 'Connected with %s:%d.' % client_address
 
@@ -67,19 +66,20 @@ class ChatServer(threading.Thread):
     def list_connected_clients(self):
         closed_clients = []
 
-        for address in self.clients:
+        for client in self.clients:
             try:
-                self.clients[address].getsockname()
+                client.getsockname()
             except socket.error:
-                closed_clients.append(address)
+                closed_clients.append(client)
 
-        for address in closed_clients:
-            del self.clients[address]
+        for client in closed_clients:
+            self.clients.remove(client)
 
-        print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
+        print '%-4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
 
-        for count, address in enumerate(self.clients):
-            print '%4d\t%11s\t%d' % (count, address[0], address[1])
+        for count, client in enumerate(self.clients):
+            address = client.getpeername()
+            print '%-4d\t%11s\t%d' % (count, address[0], address[1])
 
     def run(self):
         self.server = socket.socket()
@@ -90,7 +90,7 @@ class ChatServer(threading.Thread):
 
         while self.running:
             client, address = self.server.accept()
-            self.clients[address] = client
+            self.clients.append(client)
 
             sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
             sys.stdout.flush()
@@ -143,8 +143,8 @@ def main():
         elif response.lower() == 'myip':
             get_ip_address()
         else:
-            for address in server.clients:
-                server.clients[address].send(response)
+            for client in server.clients:
+                client.send(response)
 
 
 if __name__ == '__main__':
