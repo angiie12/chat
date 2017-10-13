@@ -87,15 +87,17 @@ class ChatServer(threading.Thread):
 
         while self.running:
             client, address = self.server.accept()
-            self.clients.append(client)
 
-            sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
-            sys.stdout.flush()
+            if self.running:
+                self.clients.append(client)
 
-            thread = threading.Thread(target=self.handle_conversation,
-                                      args=(client, address,))
-            thread.daemon = True
-            thread.start()
+                sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
+                sys.stdout.flush()
+
+                thread = threading.Thread(target=self.handle_conversation,
+                                          args=(client, address,))
+                thread.daemon = True
+                thread.start()
 
         self.server.close()
 
