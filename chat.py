@@ -48,8 +48,6 @@ class ChatServer(threading.Thread):
             except socket.error:
                 break
 
-        # self.remove_client(client, address)
-
         client.close()
 
         sys.stdout.write('\nClient %s:%s disconnected.\n>>> ' % address)
@@ -67,13 +65,21 @@ class ChatServer(threading.Thread):
         threading.Thread.join(self)
 
     def list_connected_clients(self):
+        closed_clients = []
+
+        for address in self.clients:
+            try:
+                self.clients[address].getsockname()
+            except socket.error:
+                closed_clients.append(address)
+
+        for address in closed_clients:
+            del self.clients[address]
+
         print '%4s\t%11s\t%s' % ('id:', 'IP Address', 'Port')
 
         for count, address in enumerate(self.clients):
             print '%4d\t%11s\t%d' % (count, address[0], address[1])
-
-    # def remove_client(self, client, address):
-    #     pass
 
     def run(self):
         self.server = socket.socket()
