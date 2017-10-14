@@ -98,6 +98,8 @@ class ChatServer(threading.Thread):
                                           args=(client, address,))
                 thread.daemon = True
                 thread.start()
+            else:
+                client.close()
 
         self.server.close()
 
