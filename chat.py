@@ -102,6 +102,14 @@ class ChatServer(threading.Thread):
                 client.close()
 
         self.server.close()
+    
+    def send_message(self, client_id, message):
+        for i in range(len(self.clients)):
+            if i == client_id:
+                self.clients[i].send(message)
+                return
+
+        print 'There is no recepient with the specified id.'
 
 
 def display_help_menu():
@@ -143,9 +151,11 @@ def main():
             server.list_connected_clients()
         elif response.lower() == 'myip':
             get_ip_address()
+        elif response.lower().startswith('send'):
+            response = response.split(' ')
+            server.send_message(int(response[1]), ' '.join(response[1:]))
         else:
-            for client in server.clients:
-                client.send(response)
+            print 'Invalid response.'
 
 
 if __name__ == '__main__':
