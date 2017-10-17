@@ -102,7 +102,7 @@ class ChatServer(threading.Thread):
                 client.close()
 
         self.server.close()
-    
+
     def send_message(self, client_id, message):
         for i in range(len(self.clients)):
             if i == client_id:
@@ -132,7 +132,20 @@ def get_ip_address():
 
 
 def main():
-    server = ChatServer(2048)
+    if len(sys.argv) == 1:
+        print 'Usage: %s <port>' % sys.argv[0]
+        return
+
+    try:
+        port = int(sys.argv[1])
+        if port <= 1024 or port > 66535:
+            sys.stderr.write('%d is an invalid port number.\n' % port)
+            return
+    except ValueError:
+        sys.stderr.write('"%s" is not a valid port number.\n' % sys.argv[1])
+        return
+
+    server = ChatServer(port)
     server.start()
 
     time.sleep(0.1)
@@ -153,7 +166,7 @@ def main():
             get_ip_address()
         elif response.lower().startswith('send'):
             response = response.split(' ')
-            server.send_message(int(response[1]), ' '.join(response[1:]))
+            server.send_message(int(response[1]), ' '.join(response[2:]))
         else:
             print 'Invalid response.'
 
