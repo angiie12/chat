@@ -118,17 +118,13 @@ def display_help_menu():
 
 
 def get_ip_address():
-    connection = None
-
     try:
         connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         connection.connect(('8.8.8.8', 80))
         print connection.getsockname()[0]
+        connection.close()
     except socket.error:
         print '127.0.0.1'
-    finally:
-        if connection:
-            connection.close()
 
 
 def main():
