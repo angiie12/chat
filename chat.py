@@ -155,7 +155,8 @@ def main():
 
         if response.lower().startswith('connect'):
             response = response.split(' ')
-            server.add_client(response[1], int(response[2]))
+            if len(response) == 3:
+                server.add_client(response[1], int(response[2]))
         elif response.lower() == 'exit':
             server.join()
         elif response.lower() == 'help':
@@ -168,9 +169,10 @@ def main():
             print port
         elif response.lower().startswith('send'):
             response = response.split(' ')
-            server.send_message(int(response[1]), ' '.join(response[2:]))
+            if len(response) >= 3:
+                server.send_message(int(response[1]), ' '.join(response[2:]))
         else:
-            print 'Invalid response.'
+            print '"%s" is an invalid command.' % response
 
 
 if __name__ == '__main__':
