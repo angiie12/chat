@@ -164,6 +164,8 @@ def main():
             server.list_connected_clients()
         elif response.lower() == 'myip':
             get_ip_address()
+        elif response.lower() == 'myport':
+            print port
         elif response.lower().startswith('send'):
             response = response.split(' ')
             server.send_message(int(response[1]), ' '.join(response[2:]))
