@@ -14,9 +14,14 @@ class ChatServer(threading.Thread):
         self.running = True
         self.server = None
 
-    def add_client(self, host, address):
+    def add_client(self, host, port):
+        localhost_addresses = ['localhost', '127.0.0.1']
+
+        if host in localhost_addresses and port == self.port:
+            return
+
         try:
-            client_address = (host, address)
+            client_address = (host, port)
 
             client = socket.socket()
             client.connect(client_address)
