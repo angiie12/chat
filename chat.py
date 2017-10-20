@@ -165,7 +165,10 @@ def main():
         if response.lower().startswith('connect'):
             response = response.split(' ')
             if len(response) == 3:
-                server.add_client(response[1], int(response[2]))
+                try:
+                    server.add_client(response[1], int(response[2]))
+                except ValueError:
+                    print '"%s" is not a valid port.' % response[2]
         elif response.lower() == 'exit':
             server.join()
         elif response.lower() == 'help':
@@ -179,11 +182,17 @@ def main():
         elif response.lower().startswith('send'):
             response = response.split(' ')
             if len(response) >= 3:
-                server.send_message(int(response[1]), ' '.join(response[2:]))
+                try:
+                    server.send_message(int(response[1]), ' '.join(response[2:]))
+                except ValueError:
+                    print '"%s" is not a valid client id.' % response[1]
         elif response.lower().startswith('terminate'):
             response = response.split(' ')
             if len(response) == 2:
-                server.terminate(int(response[2]))
+                try:
+                    server.terminate(int(response[2]))
+                except ValueError:
+                    print '"%s" is not a valid client id.' % response[2]
         else:
             print '"%s" is an invalid command.' % response
 
