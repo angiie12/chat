@@ -96,7 +96,7 @@ class ChatServer(threading.Thread):
             if self.running:
                 self.clients.append(client)
 
-                sys.stdout.write('Client %s:%s joined.\n>>> ' % address)
+                sys.stdout.write('\nClient %s:%s joined.\n>>> ' % address)
                 sys.stdout.flush()
 
                 thread = threading.Thread(target=self.handle_conversation,
@@ -190,7 +190,7 @@ def main():
             response = response.split(' ')
             if len(response) == 2:
                 try:
-                    server.terminate(int(response[2]))
+                    server.terminate(int(response[1]))
                 except ValueError:
                     print '"%s" is not a valid client id.' % response[2]
         else:
